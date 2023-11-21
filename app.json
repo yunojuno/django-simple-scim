@@ -1,0 +1,37 @@
+{
+    "name": "Heroku + Poetry + Django",
+    "description": "An empty Django app to test Heroku deployment issues.",
+    "repository": "https://github.com/yunojuno/poetry-template-heroku",
+    "scripts": {
+        "postdeploy": "python manage.py migrate"
+    },
+    "env": {
+        "DJANGO_SETTINGS_MODULE": {
+            "description": "Location of the settings (fixed)",
+            "value": "heroku.settings",
+            "required": true
+        },
+        "DJANGO_SECRET_KEY": {
+            "generator": "secret"
+        },
+        "POETRY_EXPORT_PARAMS": {
+            "description": "Used by Poetry buildpack (fixed)",
+            "value": "--with heroku",
+            "required": true
+        }
+    },
+    "addons": [
+        {
+            "plan": "heroku-postgresql:hobby-dev",
+            "as": "DATABASE"
+        }
+    ],
+    "buildpacks": [
+        {
+            "url": "https://github.com/yunojuno/python-poetry-buildpack.git"
+        },
+        {
+            "url": "https://github.com/heroku/heroku-buildpack-python"
+        }
+    ]
+}
