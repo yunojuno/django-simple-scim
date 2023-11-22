@@ -1,81 +1,77 @@
-# Poetry Template
+# Django Simple SCIM
 
-Django app template, using `poetry-python` as dependency manager.
+Django app to implement SCIM 2.0 
 
-This project is a template that can be cloned and re-used for redistributable apps.
+This package supports basic SCIM integration to enable your project to
+act as a SCIM Service Provider. This currently includes:
 
-It includes the following:
+- User entity CRUD operations
 
--   `poetry` for dependency management
--   `ruff`, `black` for linting / format
--   `pre-commit` to run linting
--   `mypy` for type checking
--   `tox` and Github Actions for builds and CI
+## Version support
 
-There are default config files for the linting and mypy.
+This packages supports Django 3.2+, Python 3.8+
 
-## Principles
+## What is SCIM
 
-The motivation for this project is to provide a consistent set of standards across all YunoJuno
-public Python/Django projects. The principles we want to encourage are:
+SCIM stands for System for Cross-domain Identity Management.
 
--   Simple for developers to get up-and-running
--   Consistent style (`black`, `ruff`)
--   Full type hinting (`mypy`)
+> The System for Cross-domain Identity Management (SCIM) specifications are
+> designed to make identity management in cloud-based applications and services
+> easier. [...] Its intent is to reduce the cost and complexity of user
+> management operations by providing a common user schema and extension model as
+> well as binding documents to provide patterns for exchanging this schema using
+> HTTP.
 
-## Versioning
+> This document provides a platform-neutral schema and extension model for
+> representing users and groups and other resource types in JSON format.  This
+> schema is intended for exchange and use with cloud service providers.
 
-We currently support Python 3.7+, and Django 3.2+. We will aggressively upgrade Django versions, and
-we won't introduce hacks to support breaking changes - if Django 4 introduces something that 2.2
-doesn't support we'll drop it.
+_Citation: 
+https://datatracker.ietf.org/doc/html/rfc7643_
 
-## Tests
+From the perspective of a Django application developer, it is implemented as
+a set of REST (JSON) endpoints for managing `User` and `Group` objects remotely.
 
-#### Tests package
+## Why do you need SCIM?
 
-The package tests themselves are _outside_ of the main library code, in a package that is itself a
-Django app (it contains `models`, `settings`, and any other artifacts required to run the tests
-(e.g. `urls`).) Where appropriate, this test app may be runnable as a Django project - so that
-developers can spin up the test app and see what admin screens look like, test migrations, etc.
+SCIM is used by large enterprises to manage their users' access to external
+applications. SCIM integration allows them to provision new user accounts
+and deactivate user accounts on remote systems from their existing identity
+management solutions (e.g. Google Workspace, MSFT Azure AD, Okta, ...).
 
-#### Running tests
+If you have enterprise clients signing up to your application, you have 
+probably been asked at some point if you support SSO (SAML) and SCIM. This
+package can help you to answer "yes" to that question.
 
-The tests themselves use `pytest` as the test runner. If you have installed the `poetry` evironment,
-you can run them thus:
+## Supported SCIM use cases
 
-```
-$ poetry run pytest
-```
+1. Create a new User entity
+2. Update an existing User entity
+3. Deactivate an existing User entity
+4. Delete an existing User entity
+5. Lookup an existing User entity
 
-or
+This package does not currently support Groups.
 
-```
-$ poetry shell
-(my_app) $ pytest
-```
+## What's in the box?
 
-The full suite is controlled by `tox`, which contains a set of environments that will format, lint,
-and test against all support Python + Django version combinations.
+As well as the API endpoints to support the use cases above, this package
+provides endpoints for the following:
 
-```
-$ tox
-...
-______________________ summary __________________________
-  fmt: commands succeeded
-  lint: commands succeeded
-  mypy: commands succeeded
-  py37-django22: commands succeeded
-  py37-django32: commands succeeded
-  py37-djangomain: commands succeeded
-  py38-django22: commands succeeded
-  py38-django32: commands succeeded
-  py38-djangomain: commands succeeded
-  py39-django22: commands succeeded
-  py39-django32: commands succeeded
-  py39-djangomain: commands succeeded
-```
+* Resource Schema Representation (for User only)
+* Service Provider Configuration Schema
 
-#### CI
+It adds a model, `SCIMEvent` that tracks each endpoint event, useful for
+auditing / testing / debugging.
 
-There is a `.github/workflows/tox.yml` file that can be used as a baseline to run all of the tests
-on Github. This file runs the oldest (2.2), newest (3.2), and head of the main Django branch.
+It also provides Django signals for the CRUD operations (pre/post) so that
+you can hook additional business logic into your application at each event.
+The `SCIMEvent` logging uses these signals as a demonstration.
+
+## Related docs
+
+You should read the standards before embarking on a SCIM API project:
+
+1. Definitions, Overview, Concepts, and Requirements: https://datatracker.ietf.org/doc/html/rfc7642
+2. Core schema: https://datatracker.ietf.org/doc/html/rfc7643
+3. Protocol: https://datatracker.ietf.org/doc/html/rfc7644
