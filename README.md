@@ -1,11 +1,16 @@
 # Django Simple SCIM
 
-Django app to implement SCIM 2.0 
+Django app to implement SCIM 2.0
 
 This package supports basic SCIM integration to enable your project to
 act as a SCIM Service Provider. This currently includes:
 
 - User entity CRUD operations
+- Service configuration discovery endpoints
+
+## Status
+
+In development.
 
 ## Version support
 
@@ -26,7 +31,7 @@ SCIM stands for System for Cross-domain Identity Management.
 > representing users and groups and other resource types in JSON format.  This
 > schema is intended for exchange and use with cloud service providers.
 
-_Citation: 
+_Citation:
 https://datatracker.ietf.org/doc/html/rfc7643_
 
 From the perspective of a Django application developer, it is implemented as
@@ -39,7 +44,7 @@ applications. SCIM integration allows them to provision new user accounts
 and deactivate user accounts on remote systems from their existing identity
 management solutions (e.g. Google Workspace, MSFT Azure AD, Okta, ...).
 
-If you have enterprise clients signing up to your application, you have 
+If you have enterprise clients signing up to your application, you have
 probably been asked at some point if you support SSO (SAML) and SCIM. This
 package can help you to answer "yes" to that question.
 
@@ -56,10 +61,11 @@ This package does not currently support Groups.
 ## What's in the box?
 
 As well as the API endpoints to support the use cases above, this package
-provides endpoints for the following:
+provides configuration endpoints as defined in the spec (https://datatracker.ietf.org/doc/html/rfc7644#section-4):
 
-* Resource Schema Representation (for User only)
-* Service Provider Configuration Schema
+* /ServiceProviderConfig - Service Provider Configuration Schema
+* /ResourceTypes - returns the types of resources available (User only)
+* /Schemas - returns all supported schemas (User only)
 
 It adds a model, `SCIMEvent` that tracks each endpoint event, useful for
 auditing / testing / debugging.

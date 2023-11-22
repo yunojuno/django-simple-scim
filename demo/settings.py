@@ -5,7 +5,7 @@ TEMPLATE_DEBUG = True
 USE_TZ = True
 USE_L10N = True
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "demo.db"}}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "simple_scim.db"}}
 
 INSTALLED_APPS = (
     "django.contrib.admin",
@@ -14,7 +14,8 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "my_app",
+    "simple_scim",
+    "demo"
 )
 
 MIDDLEWARE = [
