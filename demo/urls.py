@@ -7,5 +7,5 @@ admin.autodiscover()
 urlpatterns = [
     path("", debug.default_urlconf),
     path("admin/", admin.site.urls),
-    path("scim/v2/", include("simple_scim.urls")),
+    path("scim/v2/", include("simple_scim.urls", namespace="scim")),
 ]

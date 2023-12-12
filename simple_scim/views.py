@@ -1,99 +1,119 @@
-# views.py
-from django.contrib.auth.models import User
-from rest_framework import status
-from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .serializers import SCIMUserSerializer
+from django.http import HttpRequest, JsonResponse
+from django.urls import reverse
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 
-class UserList(APIView):
-    def get(self, request):
-        users = User.objects.all()
-        serializer = SCIMUserSerializer(users, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = SCIMUserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@require_GET
+def get_user(request: HttpRequest, user_id: str) -> JsonResponse:
+    """Return a user by ID."""
+    pass
 
 
-class UserDetail(APIView):
-    def get(self, request: Request, user_id: str) -> Response:
-        user = self.get_object(user_id)
-        serializer = SCIMUserSerializer(user)
-        data = serializer.data
-        data["id"] = user.id
-        data["schemas"] = ["urn:ietf:params:scim:schemas:core:2.0:User"]
-        return Response(
-            data,
-            status=status.HTTP_200_OK,
-            content_type="application/scim+json",
-        )
-
-    def put(self, request, pk):
-        user = self.get_object(pk)
-        serializer = SCIMUserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(
-                serializer.data,
-                status=status.HTTP_200_OK,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk):
-        user = self.get_object(pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_object(self, user_id: str) -> User:
-        try:
-            return User.objects.get(pk=user_id)
-        except User.DoesNotExist:
-            raise Http404
+@csrf_exempt
+@require_POST
+def create_user(request: HttpRequest) -> JsonResponse:
+    """Create a user."""
+    pass
 
 
-class ServiceProviderConfig(APIView):
-    """Provide service config as per RFC 7643."""
+@csrf_exempt
+@require_http_methods(["PUT", "PATCH"])
+def update_user(request: HttpRequest, user_id: str) -> JsonResponse:
+    """Update a user by ID."""
+    pass
 
-    def get(self, request: Request) -> Response:
-        data = {
-            "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
-            "documentationUri": "http://example.com/help/scim.html",
-            "patch": {"supported": False},
-            "bulk": {"supported": False},
-            "filter": {"supported": False},
-            "changePassword": {"supported": False},
-            "sort": {"supported": False},
-            "etag": {"supported": False},
-            "authenticationSchemes": [
-                {
-                    "name": "OAuth Bearer Token",
-                    "description": "Authentication scheme using the OAuth Bearer Token Standard",
-                    "specUri": "http://www.rfc-editor.org/info/rfc6750",
-                    "documentationUri": "http://example.com/help/oauth.html",
-                    "type": "oauthbearertoken",
-                    "primary": True,
-                },
-                {
-                    "name": "HTTP Basic",
-                    "description": "Authentication scheme using the HTTP Basic Standard",
-                    "specUri": "http://www.rfc-editor.org/info/rfc2617",
-                    "documentationUri": "http://example.com/help/httpBasic.html",
-                    "type": "httpbasic",
-                },
-            ],
-            "meta": {
-                "location": "https://example.com/v2/ServiceProviderConfig",
-                "resourceType": "ServiceProviderConfig",
-                "created": "2010-01-23T04:56:22Z",
-                "lastModified": "2011-05-13T04:42:34Z",
-                "version": 'W\/"3694e05e9dff594"',
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def delete_user(request: HttpRequest, user_id: str) -> JsonResponse:
+    """Delete a user by ID."""
+    pass
+
+
+@require_GET
+def list_users(request: HttpRequest) -> JsonResponse:
+    """List users."""
+    pass
+
+
+@require_GET
+def service_provider_config(request: HttpRequest) -> JsonResponse:
+    """
+    Provide service config as per RFC 7643.
+
+    Attributes defined in RFC 7643:
+    https://datatracker.ietf.org/doc/html/rfc7643#section-5
+
+        The service provider configuration resource enables a service
+        provider to discover SCIM specification features in a standardized
+        form as well as provide additional implementation details to clients.
+        All attributes have a mutability of "readOnly".  Unlike other core
+        resources, the "id" attribute is not required for the service
+        provider configuration resource.
+
+    """
+    data = {
+        # "documentationUri": "http://example.com/help/scim.html",
+        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ServiceProviderConfig"],
+        "patch": {"supported": False},
+        "bulk": {"supported": False},
+        "filter": {"supported": False},
+        "changePassword": {"supported": False},
+        "sort": {"supported": False},
+        "etag": {"supported": False},
+        "authenticationSchemes": [
+            {
+                "name": "OAuth Bearer Token",
+                "description": (
+                    "Authentication scheme using the OAuth Bearer Token Standard"
+                ),
+                # "specUri": "http://www.rfc-editor.org/info/rfc6750",
+                # "documentationUri": "http://example.com/help/oauth.html",
+                "type": "oauthbearertoken",
+                "primary": True,
             },
-        }
-        return Response(data=data, status=status.HTTP_200_OK)
+        ],
+        "meta": {
+            "location": reverse("scim:scim-config"),
+            "resourceType": "ServiceProviderConfig",
+            # "created": "2010-01-23T04:56:22Z",
+            # "lastModified": "2011-05-13T04:42:34Z",
+            # "version": 'W\/"3694e05e9dff594"',
+        },
+    }
+    return JsonResponse(data=data, status=200)
+
+
+@require_GET
+def resource_types(request: HttpRequest) -> JsonResponse:
+    """Provide resource types as per RFC 7643."""
+    pass
+
+
+@require_GET
+def schemas(request: HttpRequest) -> JsonResponse:
+    """Provide schemas as per RFC 7643."""
+    pass
+
+
+class SCIMUserView(View):
+    """Handle core CRUD operations on a SCIM user."""
+
+    def get(self, request: HttpRequest, user_id: str) -> JsonResponse:
+        """Fetch a user by ID."""
+        return get_user(request, user_id)
+
+    def post(self, request: HttpRequest) -> JsonResponse:
+        """Create a user."""
+        return create_user(request)
+
+    def put(self, request: HttpRequest, user_id: str) -> JsonResponse:
+        return update_user(request, user_id)
+
+    def patch(self, request: HttpRequest, user_id: str) -> JsonResponse:
+        return update_user(request, user_id)
+
+    def delete(self, request: HttpRequest, user_id: str) -> JsonResponse:
+        return delete_user(request, user_id)
